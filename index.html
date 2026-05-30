@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hera Admin Dashboard</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- FontAwesome for Premium Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Custom Style Sheet -->
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <!-- NOTIFICATION SYSTEM -->
+    <div id="toast-container" class="toast-container"></div>
+
+    <!-- LOGIN SCREEN -->
+    <div id="login-container" class="login-wrapper">
+        <div class="login-card">
+            <div class="login-header">
+                <div class="login-logo">
+                    <i class="fa-solid fa-seedling"></i>
+                </div>
+                <h2>Hera Admin</h2>
+                <p>Masukkan akun admin untuk mengontrol sistem Hera</p>
+            </div>
+            <form id="login-form">
+                <div class="form-group">
+                    <label for="login-email">Email Admin</label>
+                    <div class="input-icon">
+                        <i class="fa-regular fa-envelope"></i>
+                        <input type="email" id="login-email" placeholder="admin@hera.com" required autocomplete="username">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="login-password">Password</label>
+                    <div class="input-icon">
+                        <i class="fa-solid fa-lock"></i>
+                        <input type="password" id="login-password" placeholder="••••••••" required autocomplete="current-password">
+                    </div>
+                </div>
+                <button type="submit" class="btn btn-primary btn-block" id="btn-login">
+                    <span>Masuk</span>
+                    <i class="fa-solid fa-arrow-right"></i>
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- MAIN APP WRAPPER -->
+    <div id="app-container" class="app-wrapper hidden">
+        
+        <!-- SIDEBAR -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <div class="sidebar-logo">
+                    <i class="fa-solid fa-seedling"></i>
+                    <span>Hera Admin</span>
+                </div>
+            </div>
+            
+            <nav class="sidebar-nav">
+                <ul>
+                    <li class="nav-item active" data-tab="dashboard">
+                        <a href="#dashboard">
+                            <i class="fa-solid fa-chart-pie"></i>
+                            <span>Dashboard</span>
+                        </a>
+                    </li>
+                    <li class="nav-item" data-tab="quotes">
+                        <a href="#quotes">
+                            <i class="fa-solid fa-quote-left"></i>
+                            <span>Quotes Harian</span>
+                        </a>
+                    </li>
+                    <li class="nav-item" data-tab="journals">
+                        <a href="#journals">
+                            <i class="fa-solid fa-book-open"></i>
+                            <span>Topik Jurnal</span>
+                        </a>
+                    </li>
+                    <li class="nav-item" data-tab="chatbot">
+                        <a href="#chatbot">
+                            <i class="fa-solid fa-robot"></i>
+                            <span>Konfigurasi AI</span>
+                        </a>
+                    </li>
+                    <li class="nav-item" data-tab="users">
+                        <a href="#users">
+                            <i class="fa-solid fa-users"></i>
+                            <span>Manajemen User</span>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+
+            <div class="sidebar-footer">
+                <div class="user-profile">
+                    <div class="user-avatar" id="admin-avatar">A</div>
+                    <div class="user-info">
+                        <span class="user-name" id="admin-name">Admin Hera</span>
+                        <span class="user-role">Administrator</span>
+                    </div>
+                </div>
+                <button id="btn-logout" class="btn btn-logout">
+                    <i class="fa-solid fa-right-from-bracket"></i>
+                    <span>Keluar</span>
+                </button>
+            </div>
+        </aside>
+
+        <!-- MAIN CONTENT AREA -->
+        <main class="main-content">
+            <header class="content-header">
+                <div class="header-title">
+                    <h1 id="page-title">Dashboard Overview</h1>
+                    <p id="page-subtitle">Ringkasan status aplikasi Hera saat ini.</p>
+                </div>
+                <div class="header-actions">
+                    <span class="badge badge-success"><i class="fa-solid fa-circle"></i> Connected to Firebase</span>
+                </div>
+            </header>
+
+            <!-- TABS PANELS CONTAINER -->
+            <div class="tab-panels">
+
+                <!-- DASHBOARD PANEL -->
+                <section id="panel-dashboard" class="tab-panel active">
+                    <!-- Stat Cards Grid -->
+                    <div class="stats-grid">
+                        <div class="stat-card">
+                            <div class="stat-icon bg-emerald-light">
+                                <i class="fa-solid fa-users text-emerald"></i>
+                            </div>
+                            <div class="stat-info">
+                                <span class="stat-label">Total Pengguna</span>
+                                <h3 id="stat-total-users" class="stat-value">0</h3>
+                            </div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon bg-teal-light">
+                                <i class="fa-solid fa-quote-left text-teal"></i>
+                            </div>
+                            <div class="stat-info">
+                                <span class="stat-label">Total Quotes</span>
+                                <h3 id="stat-total-quotes" class="stat-value">0</h3>
+                            </div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon bg-indigo-light">
+                                <i class="fa-solid fa-book-open text-indigo"></i>
+                            </div>
+                            <div class="stat-info">
+                                <span class="stat-label">Topik Jurnal</span>
+                                <h3 id="stat-total-journals" class="stat-value">0</h3>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Dashboard Main Section -->
+                    <div class="dashboard-section-grid">
+                        <!-- Active Quote Card -->
+                        <div class="card col-2">
+                            <div class="card-header">
+                                <h3>Quote Aktif Hari Ini</h3>
+                                <span class="card-badge bg-emerald-light text-emerald">Live on App</span>
+                            </div>
+                            <div class="card-body">
+                                <blockquote class="active-quote-display" id="dashboard-active-quote">
+                                    "Tidak apa-apa untuk merasa lelah. Bumi pun butuh waktu untuk malam sebelum kembali menyambut pagi. Istirahatlah sejenak bersama Hera."
+                                </blockquote>
+                                <cite class="active-quote-author" id="dashboard-active-quote-author">- Self Reminder</cite>
+                            </div>
+                        </div>
+
+                        <!-- Chatbot System Prompt Card -->
+                        <div class="card col-2">
+                            <div class="card-header">
+                                <h3>Status AI Heralyze</h3>
+                                <span class="card-badge bg-indigo-light text-indigo">Active API</span>
+                            </div>
+                            <div class="card-body">
+                                <p class="chatbot-status-desc">Instruksi sistem pembentuk karakter AI Heralyze:</p>
+                                <div class="chatbot-prompt-preview" id="dashboard-ai-prompt">
+                                    Loading...
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- QUOTES PANEL -->
+                <section id="panel-quotes" class="tab-panel">
+                    <div class="panel-layout">
+                        <!-- Left Form -->
+                        <div class="card card-form">
+                            <div class="card-header">
+                                <h3>Tambah Quote Baru</h3>
+                            </div>
+                            <div class="card-body">
+                                <form id="quote-form">
+                                    <input type="hidden" id="quote-id">
+                                    <div class="form-group">
+                                        <label for="quote-text">Isi Quote</label>
+                                        <textarea id="quote-text" rows="4" placeholder="Tuliskan kata-kata inspiratif..." required></textarea>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="quote-author">Penulis / Sumber</label>
+                                        <input type="text" id="quote-author" placeholder="Contoh: Self Reminder, Albert Einstein" required>
+                                    </div>
+                                    <div class="form-group checkbox-group">
+                                        <label class="switch-container">
+                                            <input type="checkbox" id="quote-active" checked>
+                                            <span class="switch-slider"></span>
+                                        </label>
+                                        <span>Aktifkan Quote ini langsung di aplikasi</span>
+                                    </div>
+                                    <button type="submit" class="btn btn-primary btn-block" id="btn-save-quote">
+                                        <i class="fa-solid fa-save"></i> Simpan Quote
+                                    </button>
+                                    <button type="button" class="btn btn-secondary btn-block hidden" id="btn-cancel-quote-edit">
+                                        Batal Edit
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+
+                        <!-- Right List Table -->
+                        <div class="card card-table">
+                            <div class="card-header">
+                                <h3>Daftar Quotes</h3>
+                            </div>
+                            <div class="card-body">
+                                <div class="table-container">
+                                    <table class="data-table">
+                                        <thead>
+                                            <tr>
+                                                <th>Quote</th>
+                                                <th>Sumber</th>
+                                                <th style="width: 100px;">Status</th>
+                                                <th style="width: 120px;">Aksi</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="quotes-list">
+                                            <tr>
+                                                <td colspan="4" class="text-center">Loading data...</td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- JOURNAL TOPICS PANEL -->
+                <section id="panel-journals" class="tab-panel">
+                    <div class="panel-layout">
+                        <!-- Left Form -->
+                        <div class="card card-form">
+                            <div class="card-header">
+                                <h3>Tambah / Edit Topik Jurnal</h3>
+                            </div>
+                            <div class="card-body">
+                                <form id="journal-form">
+                                    <input type="hidden" id="journal-id">
+                                    <div class="form-group">
+                                        <label for="journal-title">Judul Topik</label>
+                                        <input type="text" id="journal-title" placeholder="Contoh: Kenali Diri Lebih Baik" required>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="journal-objective">Tujuan</label>
+                                        <input type="text" id="journal-objective" placeholder="Contoh: Tujuan: Memahami pikiran..." required>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="journal-order">Urutan Tampilan</label>
+                                        <input type="number" id="journal-order" value="1" min="1" required>
+                                    </div>
+                                    <div class="form-group">
+                                        <div class="label-header">
+                                            <label>Daftar Langkah Jurnal (Steps)</label>
+                                            <button type="button" class="btn-text" id="btn-add-step">
+                                                <i class="fa-solid fa-plus-circle"></i> Tambah Langkah
+                                            </button>
+                                        </div>
+                                        <div id="journal-steps-container" class="steps-builder">
+                                            <!-- Dynamic steps inputs will go here -->
+                                        </div>
+                                    </div>
+                                    <button type="submit" class="btn btn-primary btn-block" id="btn-save-journal">
+                                        <i class="fa-solid fa-save"></i> Simpan Jurnal
+                                    </button>
+                                    <button type="button" class="btn btn-secondary btn-block hidden" id="btn-cancel-journal-edit">
+                                        Batal Edit
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+
+                        <!-- Right List Card -->
+                        <div class="card card-list">
+                            <div class="card-header">
+                                <h3>Topik Jurnal Aktif</h3>
+                            </div>
+                            <div class="card-body">
+                                <div id="journals-list" class="journals-cards-list">
+                                    <!-- Journal Cards will load dynamically -->
+                                    <p class="text-center text-muted">Loading topics...</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- CHATBOT AI CONFIG PANEL -->
+                <section id="panel-chatbot" class="tab-panel">
+                    <div class="card max-w-lg">
+                        <div class="card-header">
+                            <h3>Konfigurasi Karakter & Prompt Heralyze AI</h3>
+                        </div>
+                        <div class="card-body">
+                            <form id="chatbot-config-form">
+                                <div class="form-group">
+                                    <label for="chatbot-system-prompt">System Prompt (Karakter & Instruksi AI)</label>
+                                    <p class="form-helper">Prompt ini mengatur gaya bahasa, nada bicara, serta batasan apa saja yang boleh dan tidak boleh dilakukan oleh AI Heralyze saat mengobrol dengan pengguna.</p>
+                                    <textarea id="chatbot-system-prompt" rows="8" placeholder="Masukkan instruksi pembentuk karakter AI..." required></textarea>
+                                </div>
+                                <button type="submit" class="btn btn-primary" id="btn-save-chatbot">
+                                    <i class="fa-solid fa-save"></i> Perbarui Konfigurasi AI
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- USERS PANEL -->
+                <section id="panel-users" class="tab-panel">
+                    <div class="card">
+                        <div class="card-header">
+                            <h3>Daftar Pengguna Aplikasi Hera</h3>
+                        </div>
+                        <div class="card-body">
+                            <div class="table-container">
+                                <table class="data-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Nama Lengkap</th>
+                                            <th>Email</th>
+                                            <th>Role / Peran</th>
+                                            <th>Tanggal Registrasi</th>
+                                            <th style="width: 150px;">Aksi</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="users-list">
+                                        <tr>
+                                            <td colspan="5" class="text-center">Loading users...</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+            </div>
+        </main>
+    </div>
+
+    <!-- Firebase App Configuration -->
+    <script src="firebase-config.js"></script>
+    <!-- Core logic script using native ES Modules -->
+    <script type="module" src="app.js"></script>
+</body>
+</html>
