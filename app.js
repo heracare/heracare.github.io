@@ -19,6 +19,7 @@ import {
     query, 
     orderBy 
 } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+// Firebase Storage removed — using external URLs instead (no Blaze plan needed)
 
 // Retrieve config from global window object
 const firebaseConfig = window.firebaseConfig;
@@ -30,10 +31,13 @@ if (!firebaseConfig) {
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
+// Storage removed — articles use external URLs
 
 // Keep track of active edit IDs
 let editingQuoteId = null;
 let editingJournalId = null;
+let editingArticleId = null;
+let currentArticleMediaUrl = null;
 
 // DOM Elements
 const loginContainer = document.getElementById('login-container');
@@ -162,6 +166,7 @@ navItems.forEach(item => {
         if (tab === 'dashboard') loadDashboardData();
         else if (tab === 'quotes') loadQuotesPage();
         else if (tab === 'journals') loadJournalsPage();
+        else if (tab === 'articles') loadArticlesPage();
         else if (tab === 'chatbot') loadChatbotPage();
         else if (tab === 'users') loadUsersPage();
     });
@@ -172,6 +177,7 @@ function updatePageTitles(tab) {
         dashboard: { title: "Dashboard Overview", subtitle: "Ringkasan status aplikasi Hera saat ini." },
         quotes: { title: "Quotes Harian", subtitle: "Kelola kutipan motivasi harian yang tampil di beranda aplikasi." },
         journals: { title: "Topik Jurnal", subtitle: "Kelola topik, instruksi, dan langkah-langkah latihan relasi diri." },
+        articles: { title: "Artikel", subtitle: "Kelola konten edukasi makanan sehat dan tips kesehatan untuk menaikkan mood." },
         chatbot: { title: "Konfigurasi AI Heralyze", subtitle: "Atur kepribadian, gaya penulisan, dan perilaku agen AI chatbot." },
         users: { title: "Manajemen User", subtitle: "Pantau pengguna aplikasi dan atur peran administrasi." }
     };
@@ -185,11 +191,16 @@ function updatePageTitles(tab) {
 function resetForms() {
     editingQuoteId = null;
     editingJournalId = null;
+    editingArticleId = null;
+    currentArticleMediaUrl = null;
     document.getElementById('quote-form').reset();
     document.getElementById('journal-form').reset();
+    document.getElementById('article-form').reset();
     document.getElementById('btn-cancel-quote-edit').classList.add('hidden');
     document.getElementById('btn-cancel-journal-edit').classList.add('hidden');
+    document.getElementById('btn-cancel-article-edit').classList.add('hidden');
     document.getElementById('journal-steps-container').innerHTML = '';
+    document.getElementById('btn-save-article').innerHTML = `<i class="fa-solid fa-save"></i> Simpan Artikel`;
 }
 
 // ==========================================
@@ -208,6 +219,10 @@ async function loadDashboardData() {
         // Fetch Journals count
         const journalsSnap = await getDocs(collection(db, "journals"));
         document.getElementById('stat-total-journals').textContent = journalsSnap.size;
+
+        // Fetch Articles count
+        const articlesSnap = await getDocs(collection(db, "articles"));
+        document.getElementById('stat-total-articles').textContent = articlesSnap.size;
         
         // Show active quote
         const activeQuoteQuery = query(collection(db, "quotes"));
@@ -708,3 +723,219 @@ function bindUsersEvents() {
         });
     });
 }
+
+// Category selection change listener — update label hint
+const articleCategorySelect = document.getElementById('article-category');
+if (articleCategorySelect) {
+    articleCategorySelect.addEventListener('change', (e) => {
+        // Both categories use image URL, just update helper text
+        const cat = e.target.value;
+        const urlHelper = document.getElementById('article-media-url-helper');
+        if (cat === 'makanan') {
+            urlHelper.textContent = 'Paste link gambar makanan dari Google Drive, Imgur, dsb.';
+        } else if (cat === 'tips') {
+            urlHelper.textContent = 'Paste link gambar tips kesehatan dari Google Drive, Imgur, dsb.';
+        }
+        // Also update preview when category changes
+        updateMediaPreview();
+    });
+}
+
+// Live URL Preview
+const mediaUrlInput = document.getElementById('article-media-url');
+let previewDebounce = null;
+
+function updateMediaPreview() {
+    const previewBox = document.getElementById('media-url-preview');
+    const url = document.getElementById('article-media-url').value.trim();
+
+    if (!url) {
+        previewBox.classList.add('hidden');
+        previewBox.innerHTML = '';
+        return;
+    }
+
+    previewBox.classList.remove('hidden');
+    previewBox.innerHTML = `
+        <p class="preview-label">Preview Gambar</p>
+        <img src="${url}" alt="preview" onerror="this.outerHTML='<p class=\\'preview-error\\'><i class=\\'fa-solid fa-triangle-exclamation\\'></i> Gambar tidak bisa dimuat. Pastikan URL-nya langsung mengarah ke file gambar.</p>'">
+    `;
+}
+
+if (mediaUrlInput) {
+    mediaUrlInput.addEventListener('input', () => {
+        clearTimeout(previewDebounce);
+        previewDebounce = setTimeout(updateMediaPreview, 600);
+    });
+    mediaUrlInput.addEventListener('paste', () => {
+        clearTimeout(previewDebounce);
+        previewDebounce = setTimeout(updateMediaPreview, 300);
+    });
+}
+// ==========================================
+// 6. ARTICLES PANEL CONTROLLER
+// ==========================================
+async function loadArticlesPage() {
+    resetForms();
+    await renderArticlesTable();
+}
+
+async function renderArticlesTable() {
+    const listEl = document.getElementById('articles-list');
+    listEl.innerHTML = `<tr><td colspan="4" class="text-center">Memuat data artikel...</td></tr>`;
+    
+    try {
+        const articlesQuery = query(collection(db, "articles"), orderBy("createdAt", "desc"));
+        const querySnap = await getDocs(articlesQuery);
+        
+        if (querySnap.empty) {
+            listEl.innerHTML = `<tr><td colspan="4" class="text-center text-muted">Belum ada data artikel.</td></tr>`;
+            return;
+        }
+        
+        listEl.innerHTML = '';
+        querySnap.forEach(docSnap => {
+            const article = docSnap.data();
+            const id = docSnap.id;
+            
+            const tr = document.createElement('tr');
+            
+            let mediaPreviewHtml = `<img src="${article.mediaUrl}" class="media-preview-img" alt="preview">`;
+            
+            tr.innerHTML = `
+                <td>
+                    <div style="font-weight: 600;">${article.title}</div>
+                    <div class="text-muted" style="font-size: 12px; max-width: 250px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+                        ${article.description || ''}
+                    </div>
+                </td>
+                <td>
+                    <span class="badge ${article.category === 'makanan' ? 'bg-emerald-light text-emerald' : 'bg-indigo-light text-indigo'}">
+                        ${article.category.charAt(0).toUpperCase() + article.category.slice(1)}
+                    </span>
+                </td>
+                <td>${mediaPreviewHtml}</td>
+                <td>
+                    <div class="table-actions">
+                        <button class="btn btn-edit btn-action-small btn-edit-article" data-id="${id}">
+                            <i class="fa-solid fa-pencil"></i>
+                        </button>
+                        <button class="btn btn-danger btn-action-small btn-delete-article" data-id="${id}">
+                            <i class="fa-solid fa-trash"></i>
+                        </button>
+                    </div>
+                </td>
+            `;
+            listEl.appendChild(tr);
+        });
+        
+        bindArticlesTableEvents();
+    } catch (error) {
+        console.error(error);
+        showToast("Gagal memuat daftar artikel: " + error.message, "error");
+    }
+}
+
+function bindArticlesTableEvents() {
+    // Edit Article
+    document.querySelectorAll('.btn-edit-article').forEach(btn => {
+        btn.addEventListener('click', async () => {
+            const id = btn.getAttribute('data-id');
+            try {
+                const docSnap = await getDoc(doc(db, "articles", id));
+                if (docSnap.exists()) {
+                    const data = docSnap.data();
+                    editingArticleId = id;
+                    currentArticleMediaUrl = data.mediaUrl;
+                    
+                    document.getElementById('article-title').value = data.title;
+                    document.getElementById('article-category').value = data.category;
+                    document.getElementById('article-content').value = data.description;
+                    document.getElementById('article-media-url').value = data.mediaUrl || '';
+                    
+                    // Dispatch change event to update label hints
+                    document.getElementById('article-category').dispatchEvent(new Event('change'));
+                    
+                    document.getElementById('btn-cancel-article-edit').classList.remove('hidden');
+                    document.getElementById('btn-save-article').innerHTML = `<i class="fa-solid fa-save"></i> Perbarui Artikel`;
+                    
+                    showToast("Memuat artikel untuk diedit.", "success");
+                }
+            } catch (error) {
+                console.error(error);
+                showToast("Gagal memuat detail artikel: " + error.message, "error");
+            }
+        });
+    });
+
+    // Delete Article
+    document.querySelectorAll('.btn-delete-article').forEach(btn => {
+        btn.addEventListener('click', async () => {
+            const id = btn.getAttribute('data-id');
+            if (confirm("Apakah Anda yakin ingin menghapus artikel ini?")) {
+                try {
+                    await deleteDoc(doc(db, "articles", id));
+                    showToast("Artikel berhasil dihapus.", "success");
+                    await renderArticlesTable();
+                    await loadDashboardData();
+                } catch (error) {
+                    console.error(error);
+                    showToast("Gagal menghapus artikel: " + error.message, "error");
+                }
+            }
+        });
+    });
+}
+
+// Article Form Submit
+document.getElementById('article-form').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    
+    const title = document.getElementById('article-title').value.trim();
+    const category = document.getElementById('article-category').value;
+    const description = document.getElementById('article-content').value.trim();
+    const mediaUrl = document.getElementById('article-media-url').value.trim();
+    
+    if (!mediaUrl) {
+        showToast("Silakan masukkan URL media.", "error");
+        return;
+    }
+    
+    const btnSave = document.getElementById('btn-save-article');
+    btnSave.disabled = true;
+    btnSave.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> Menyimpan...`;
+    
+    try {
+        const articleData = {
+            title,
+            category,
+            description,
+            mediaUrl,
+            createdAt: new Date().toISOString()
+        };
+        
+        if (editingArticleId) {
+            await setDoc(doc(db, "articles", editingArticleId), articleData, { merge: true });
+            showToast("Artikel berhasil diperbarui.", "success");
+        } else {
+            await addDoc(collection(db, "articles"), articleData);
+            showToast("Artikel baru berhasil ditambahkan.", "success");
+        }
+        
+        resetForms();
+        await renderArticlesTable();
+        await loadDashboardData();
+    } catch (error) {
+        console.error(error);
+        showToast("Gagal menyimpan artikel: " + error.message, "error");
+    } finally {
+        btnSave.disabled = false;
+        btnSave.innerHTML = editingArticleId ? `<i class="fa-solid fa-save"></i> Perbarui Artikel` : `<i class="fa-solid fa-save"></i> Simpan Artikel`;
+    }
+});
+
+// Cancel Article Edit
+document.getElementById('btn-cancel-article-edit').addEventListener('click', () => {
+    resetForms();
+});
+

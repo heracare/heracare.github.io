@@ -4,6 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="referrer" content="no-referrer">
     <title>Hera Admin Dashboard</title>
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -89,6 +90,12 @@
                             <span>Topik Jurnal</span>
                         </a>
                     </li>
+                    <li class="nav-item" data-tab="articles">
+                        <a href="#articles">
+                            <i class="fa-solid fa-file-text"></i>
+                            <span>Artikel & Media</span>
+                        </a>
+                    </li>
                     <li class="nav-item" data-tab="chatbot">
                         <a href="#chatbot">
                             <i class="fa-solid fa-robot"></i>
@@ -163,6 +170,15 @@
                             <div class="stat-info">
                                 <span class="stat-label">Topik Jurnal</span>
                                 <h3 id="stat-total-journals" class="stat-value">0</h3>
+                            </div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon bg-amber-light">
+                                <i class="fa-solid fa-file-text text-amber"></i>
+                            </div>
+                            <div class="stat-info">
+                                <span class="stat-label">Total Artikel</span>
+                                <h3 id="stat-total-articles" class="stat-value">0</h3>
                             </div>
                         </div>
                     </div>
@@ -350,6 +366,82 @@
                                     <i class="fa-solid fa-save"></i> Perbarui Konfigurasi AI
                                 </button>
                             </form>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- ARTICLES PANEL -->
+                <section id="panel-articles" class="tab-panel">
+                    <div class="panel-layout">
+                        <!-- Left Form -->
+                        <div class="card card-form">
+                            <div class="card-header">
+                                <h3>Tambah Artikel</h3>
+                            </div>
+                            <div class="card-body">
+                                <form id="article-form">
+                                    <input type="hidden" id="article-id">
+                                    <div class="form-group">
+                                        <label for="article-title">Judul Artikel</label>
+                                        <input type="text" id="article-title" placeholder="Contoh: Pisang Penenang Mood / Tips Tidur Berkualitas" required>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="article-category">Kategori</label>
+                                        <select id="article-category" class="form-control-select" required>
+                                            <option value="makanan">Makanan Sehat</option>
+                                            <option value="tips">Tips Kesehatan</option>
+                                        </select>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="article-content">Konten / Deskripsi</label>
+                                        <textarea id="article-content" rows="4" placeholder="Tuliskan isi manfaat makanan atau tips kesehatan..." required></textarea>
+                                    </div>
+                                    
+                                    <!-- Media URL Input -->
+                                    <div class="form-group">
+                                        <label for="article-media-url" id="article-media-url-label">URL Gambar</label>
+                                        <div class="input-icon">
+                                            <i class="fa-solid fa-link"></i>
+                                            <input type="url" id="article-media-url" placeholder="https://contoh.com/gambar.jpg" required>
+                                        </div>
+                                        <p class="form-helper" id="article-media-url-helper">Paste link gambar dari Google Drive, Imgur, atau sumber lain.</p>
+                                        <div id="media-url-preview" class="media-url-preview hidden"></div>
+                                    </div>
+
+                                    <button type="submit" class="btn btn-primary btn-block" id="btn-save-article">
+                                        <i class="fa-solid fa-save"></i> Simpan Artikel
+                                    </button>
+                                    <button type="button" class="btn btn-secondary btn-block hidden" id="btn-cancel-article-edit">
+                                        Batal Edit
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+
+                        <!-- Right List Table -->
+                        <div class="card card-table">
+                            <div class="card-header">
+                                <h3>Daftar Artikel & Media</h3>
+                            </div>
+                            <div class="card-body">
+                                <div class="table-container">
+                                    <table class="data-table">
+                                        <thead>
+                                            <tr>
+                                                <th>Judul</th>
+                                                <th>Kategori</th>
+                                                <th>Media Preview</th>
+                                                <th style="width: 120px;">Aksi</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="articles-list">
+                                            <tr>
+                                                <td colspan="4" class="text-center">Loading data...</td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </section>
