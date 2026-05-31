@@ -685,9 +685,14 @@ async function loadUsersPage() {
                 </td>
                 <td>${registerDate}</td>
                 <td>
-                    <button class="btn btn-edit btn-action-small btn-toggle-role" data-id="${id}" data-role="${user.role}">
-                        <i class="fa-solid fa-user-shield"></i> Ubah Peran
-                    </button>
+                    <div class="table-actions">
+                        <button class="btn btn-edit btn-action-small btn-toggle-role" data-id="${id}" data-role="${user.role}">
+                            <i class="fa-solid fa-user-shield"></i> Ubah Peran
+                        </button>
+                        <button class="btn btn-danger btn-action-small btn-delete-user" data-id="${id}">
+                            <i class="fa-solid fa-trash"></i> Hapus
+                        </button>
+                    </div>
                 </td>
             `;
             listEl.appendChild(tr);
@@ -721,6 +726,30 @@ function bindUsersEvents() {
                     await loadDashboardData();
                 } catch (error) {
                     showToast("Gagal mengubah peran: " + error.message, "error");
+                }
+            }
+        });
+    });
+
+    // Delete User Firestore Document
+    document.querySelectorAll('.btn-delete-user').forEach(btn => {
+        btn.addEventListener('click', async () => {
+            const uid = btn.getAttribute('data-id');
+            
+            // Protection: Prevent admin from deleting themselves
+            if (uid === auth.currentUser.uid) {
+                showToast("Gagal: Anda tidak dapat menghapus akun Anda sendiri.", "error");
+                return;
+            }
+            
+            if (confirm("Apakah Anda yakin ingin menghapus data pengguna ini dari Firestore?\n\nCatatan: Tindakan ini hanya menghapus data profil pengguna di database Firestore agar tidak tampil di dashboard. Pastikan Anda juga telah menghapus akun pengguna ini di Firebase Console Authentication agar sinkron sepenuhnya.")) {
+                try {
+                    await deleteDoc(doc(db, "users", uid));
+                    showToast("Data pengguna berhasil dihapus dari database Firestore.", "success");
+                    await loadUsersPage();
+                    await loadDashboardData();
+                } catch (error) {
+                    showToast("Gagal menghapus data pengguna: " + error.message, "error");
                 }
             }
         });
