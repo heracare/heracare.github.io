@@ -727,61 +727,6 @@ function bindUsersEvents() {
     });
 }
 
-// User Registration Form Handler (with temporary Firebase App instance to prevent logout!)
-const userForm = document.getElementById('user-form');
-if (userForm) {
-    userForm.addEventListener('submit', async (e) => {
-        e.preventDefault();
-        
-        const name = document.getElementById('reg-name').value.trim();
-        const email = document.getElementById('reg-email').value.trim();
-        const password = document.getElementById('reg-password').value;
-        const role = document.getElementById('reg-role').value;
-        const btnSave = document.getElementById('btn-save-user');
-        
-        btnSave.disabled = true;
-        btnSave.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> Menyimpan...`;
-        
-        // Initialize a temporary secondary Firebase app to register the user
-        const tempApp = initializeApp(firebaseConfig, `TempRegisterApp_${Date.now()}`);
-        const tempAuth = getAuth(tempApp);
-        
-        try {
-            // Register in Firebase Auth (runs securely on secondary app!)
-            const userCredential = await createUserWithEmailAndPassword(tempAuth, email, password);
-            const newUser = userCredential.user;
-            
-            // Write document to primary Firestore database
-            await setDoc(doc(db, "users", newUser.uid), {
-                uid: newUser.uid,
-                name: name,
-                email: email,
-                role: role,
-                createdAt: new Date().toISOString()
-            });
-            
-            showToast("Pengguna baru berhasil didaftarkan!", "success");
-            userForm.reset();
-            await loadUsersPage();
-            await loadDashboardData();
-        } catch (error) {
-            console.error(error);
-            if (error.code === 'auth/email-already-in-use') {
-                showToast("Email sudah terdaftar! Silakan hapus akun tersebut di Firebase Console Auth jika ingin mendaftarkan ulang.", "error");
-            } else {
-                showToast("Gagal mendaftarkan pengguna: " + error.message, "error");
-            }
-        } finally {
-            // Clean up secondary app resources to prevent leakage
-            try {
-                await tempApp.delete();
-            } catch (err) {}
-            btnSave.disabled = false;
-            btnSave.innerHTML = `<i class="fa-solid fa-user-plus"></i> Tambah Pengguna`;
-        }
-    });
-}
-
 // Category selection change listener — update label hint
 const articleCategorySelect = document.getElementById('article-category');
 if (articleCategorySelect) {

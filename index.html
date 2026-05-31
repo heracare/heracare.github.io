@@ -448,64 +448,29 @@
 
                 <!-- USERS PANEL -->
                 <section id="panel-users" class="tab-panel">
-                    <div class="panel-layout">
-                        <!-- Left Form: Tambah Pengguna Baru -->
-                        <div class="card card-form">
-                            <div class="card-header">
-                                <h3>Tambah Pengguna</h3>
-                            </div>
-                            <div class="card-body">
-                                <form id="user-form">
-                                    <div class="form-group">
-                                        <label for="reg-name">Nama Lengkap</label>
-                                        <input type="text" id="reg-name" placeholder="Contoh: Budi Santoso" required>
-                                    </div>
-                                    <div class="form-group">
-                                        <label for="reg-email">Email</label>
-                                        <input type="email" id="reg-email" placeholder="budi@example.com" required autocomplete="username">
-                                    </div>
-                                    <div class="form-group">
-                                        <label for="reg-password">Password</label>
-                                        <input type="password" id="reg-password" placeholder="Minimal 6 karakter" minlength="6" required autocomplete="new-password">
-                                    </div>
-                                    <div class="form-group">
-                                        <label for="reg-role">Role / Peran</label>
-                                        <select id="reg-role" class="form-control-select" required>
-                                            <option value="user">User Biasa</option>
-                                            <option value="admin">Administrator</option>
-                                        </select>
-                                    </div>
-                                    <button type="submit" class="btn btn-primary btn-block" id="btn-save-user">
-                                        <i class="fa-solid fa-user-plus"></i> Tambah Pengguna
-                                    </button>
-                                </form>
-                            </div>
+                    <!-- Table: Daftar Pengguna -->
+                    <div class="card card-table">
+                        <div class="card-header">
+                            <h3>Daftar Pengguna Aplikasi Hera</h3>
                         </div>
-
-                        <!-- Right Table: Daftar Pengguna -->
-                        <div class="card card-table">
-                            <div class="card-header">
-                                <h3>Daftar Pengguna Aplikasi Hera</h3>
-                            </div>
-                            <div class="card-body">
-                                <div class="table-container">
-                                    <table class="data-table">
-                                        <thead>
-                                            <tr>
-                                                <th>Nama Lengkap</th>
-                                                <th>Email</th>
-                                                <th>Role / Peran</th>
-                                                <th>Tanggal Registrasi</th>
-                                                <th style="width: 140px;">Aksi</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody id="users-list">
-                                            <tr>
-                                                <td colspan="5" class="text-center">Loading users...</td>
-                                            </tr>
-                                        </tbody>
-                                    </table>
-                                </div>
+                        <div class="card-body">
+                            <div class="table-container">
+                                <table class="data-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Nama Lengkap</th>
+                                            <th>Email</th>
+                                            <th>Role / Peran</th>
+                                            <th>Tanggal Registrasi</th>
+                                            <th style="width: 140px;">Aksi</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="users-list">
+                                        <tr>
+                                            <td colspan="5" class="text-center">Loading users...</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
                             </div>
                         </div>
                     </div>
