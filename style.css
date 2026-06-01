@@ -13,7 +13,8 @@
     --mint-light: #e6f6f2;
     --dark: #0f172a;
     --dark-surface: #1e293b;
-    --light-bg: #f8fafc;
+    --light-bg: #ffffff;
+    --card-bg: #f1f5f9;
     --border-color: #e2e8f0;
     
     --text-main: #334155;
@@ -51,7 +52,7 @@
 }
 
 body {
-    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-family: 'Poppins', sans-serif;
     background-color: var(--light-bg);
     color: var(--text-main);
     line-height: 1.5;
@@ -59,7 +60,7 @@ body {
 }
 
 h1, h2, h3, h4, h5, h6 {
-    font-family: 'Outfit', sans-serif;
+    font-family: 'Poppins', sans-serif;
     color: var(--dark);
     font-weight: 600;
 }
@@ -363,7 +364,7 @@ input:checked + .switch-slider:before {
 }
 
 .login-card {
-    background: white;
+    background: var(--card-bg);
     border-radius: var(--radius-lg);
     box-shadow: var(--shadow-lg);
     width: 100%;
@@ -570,7 +571,7 @@ input:checked + .switch-slider:before {
 
 /* CARDS */
 .card {
-    background-color: white;
+    background-color: var(--card-bg);
     border-radius: var(--radius-lg);
     box-shadow: var(--shadow-sm);
     border: 1px solid var(--border-color);
@@ -616,7 +617,7 @@ input:checked + .switch-slider:before {
 }
 
 .stat-card {
-    background-color: white;
+    background-color: var(--card-bg);
     border-radius: var(--radius-lg);
     border: 1px solid var(--border-color);
     padding: 24px;
@@ -796,7 +797,7 @@ input:checked + .switch-slider:before {
 .journal-list-item {
     border: 1px solid var(--border-color);
     border-radius: var(--radius-md);
-    background-color: white;
+    background-color: var(--card-bg);
     overflow: hidden;
 }
 
